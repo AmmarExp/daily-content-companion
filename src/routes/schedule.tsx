@@ -112,7 +112,10 @@ function SchedulePage() {
                           <option value="linkedin">LinkedIn only</option>
                           <option value="both">Both</option>
                         </select>
-                        <button onClick={() => save.mutate({ ...s, platform_mode: s.platform_mode as "x" | "linkedin" | "both", image_required: !s.image_required })} className="tap grid h-9 w-9 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive" style={{display:"none"}} />
+                        <label className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-xs">
+                          <input type="checkbox" checked={s.image_required} onChange={(e) => save.mutate({ ...s, platform_mode: s.platform_mode as "x" | "linkedin" | "both", image_required: e.target.checked })} />
+                          Image
+                        </label>
                       </div>
                       <button onClick={() => del.mutate(s.id)} className="tap grid h-9 w-9 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
                         <Trash2 className="h-4 w-4" />
