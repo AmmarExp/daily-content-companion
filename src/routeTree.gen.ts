@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicHooksDailyGenerateRouteImport } from './routes/api/public/hooks/daily-generate'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksDailyGenerateRoute =
+  ApiPublicHooksDailyGenerateRouteImport.update({
+    id: '/api/public/hooks/daily-generate',
+    path: '/api/public/hooks/daily-generate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/hooks/daily-generate'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/hooks/daily-generate'
+  id: '__root__' | '/' | '/api/public/hooks/daily-generate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicHooksDailyGenerateRoute: typeof ApiPublicHooksDailyGenerateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +59,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/daily-generate': {
+      id: '/api/public/hooks/daily-generate'
+      path: '/api/public/hooks/daily-generate'
+      fullPath: '/api/public/hooks/daily-generate'
+      preLoaderRoute: typeof ApiPublicHooksDailyGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicHooksDailyGenerateRoute: ApiPublicHooksDailyGenerateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
