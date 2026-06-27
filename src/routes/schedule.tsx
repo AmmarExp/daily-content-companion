@@ -30,10 +30,22 @@ function SchedulePage() {
   const projects = projectsQ.data ?? [];
   const schedules = (schedQ.data ?? []).filter((s) => !filter || s.project_id === filter);
 
+  type ScheduleInput = {
+    id?: string;
+    project_id: string;
+    day_of_week: number;
+    posts_per_day: number;
+    slot_time: string;
+    platform_mode: "x" | "linkedin" | "both";
+    topic_mode: string;
+    image_required: boolean;
+    active: boolean;
+  };
+
   const [adding, setAdding] = useState<string | null>(null); // project_id when adding
 
   const save = useMutation({
-    mutationFn: (v: Parameters<typeof upsertFn>[0]["data"]) => upsertFn({ data: v }),
+    mutationFn: (v: ScheduleInput) => upsertFn({ data: v }),
     onSuccess: () => {
       toast.success("Saved");
       setAdding(null);
