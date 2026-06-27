@@ -5,7 +5,7 @@ import { listProjects, upsertProject, deleteProject } from "@/lib/projects.funct
 import { AppShell } from "@/components/AppShell";
 import { Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { ProjectFormModal } from "@/components/ProjectFormModal";
+import { ProjectFormModal, type ProjectFormValues } from "@/components/ProjectFormModal";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/projects")({
@@ -22,7 +22,7 @@ function ProjectsPage() {
   const delFn = useServerFn(deleteProject);
 
   const create = useMutation({
-    mutationFn: (v: Parameters<typeof upsertFn>[0]["data"]) => upsertFn({ data: v }),
+    mutationFn: (v: ProjectFormValues) => upsertFn({ data: v }),
     onSuccess: () => {
       toast.success("Project saved");
       setOpen(false);

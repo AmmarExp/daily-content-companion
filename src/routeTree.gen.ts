@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicHooksDailyGenerateRouteImport } from './routes/api/public/hooks/daily-generate'
 
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -26,32 +32,43 @@ const ApiPublicHooksDailyGenerateRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/projects': typeof ProjectsRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/projects': typeof ProjectsRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/projects': typeof ProjectsRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/hooks/daily-generate'
+  fullPaths: '/' | '/projects' | '/api/public/hooks/daily-generate'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/hooks/daily-generate'
-  id: '__root__' | '/' | '/api/public/hooks/daily-generate'
+  to: '/' | '/projects' | '/api/public/hooks/daily-generate'
+  id: '__root__' | '/' | '/projects' | '/api/public/hooks/daily-generate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProjectsRoute: typeof ProjectsRoute
   ApiPublicHooksDailyGenerateRoute: typeof ApiPublicHooksDailyGenerateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProjectsRoute: ProjectsRoute,
   ApiPublicHooksDailyGenerateRoute: ApiPublicHooksDailyGenerateRoute,
 }
 export const routeTree = rootRouteImport
