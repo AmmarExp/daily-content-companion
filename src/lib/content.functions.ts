@@ -10,6 +10,7 @@ type KnowledgeBundle = {
   cta?: string | null;
   brandColor?: string | null;
   brief?: string | null;
+  writingPrompt?: string | null;
   notes?: Record<string, string | null> | null;
   recentTopics?: string[];
 };
@@ -20,6 +21,29 @@ function buildSystemPrompt(b: KnowledgeBundle, platform: "x" | "linkedin" | "bot
     ? `Write in MODERN Saudi/Gulf-friendly Arabic. Natural, sharp, conversational — not formal MSA, not stiff translation. Use light tasteful emojis only when they add meaning.`
     : `Write in ${b.language || "English"}. Crisp, distinctive, human voice. Avoid AI clichés like "in today's fast-paced world", "unlock", "elevate", "game-changer", "synergy".`;
 
+  // If a project-specific writing prompt exists, use it as the full system instruction
+  if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
+    return `${b.writingPrompt.trim()}
+
+${b.recentTopics?.length ? `\nالمواضيع الأخيرة التي تمت كتابتها — لا تكررها: ${b.recentTopics.join(" | ")}` : ""}
+
+PLATFORM RULES:
+- X post: max 270 chars, punchy hook in line 1, no fluff, 1 strong idea, no hashtag spam (0-2 max), no "1/" threads.
+- LinkedIn post: 600-1100 chars, hook in line 1, scannable line breaks, professional but human, ends with a soft CTA or question, 0-3 hashtags at the end.
+
+Return ONLY a JSON object — no markdown, no commentary:
+{
+  "topic_title": "...",
+  "objective": "awareness | engagement | conversion | education",
+  "x_post": "...",
+  "linkedin_post": "...",
+  "cta_text": "...",
+  "hashtags": "#one #two",
+  "raw_image_concept": "وصف مختصر للفكرة البصرية للمنشور في جملة أو جملتين"
+}`;
+  }
+
+  // Fallback generic prompt
   return `You are a senior brand copywriter for "${b.projectName}".
 ${langRule}
 
@@ -43,7 +67,6 @@ ${b.recentTopics?.length ? `RECENT TOPICS (do NOT repeat): ${b.recentTopics.join
 PLATFORM RULES:
 - X post: max 270 chars, punchy hook in line 1, no fluff, 1 strong idea, no hashtag spam (0-2 max), no "1/" threads.
 - LinkedIn post: 600-1100 chars, hook in line 1, scannable line breaks, professional but human, ends with a soft CTA or question, 0-3 hashtags at the end.
-- Image prompt: ONE high-quality, brand-aware visual concept. Photoreal or sharp editorial illustration. Strong composition. Mention brand color ${b.brandColor || ""} subtly if relevant. No text overlays. No watermarks. No people unless essential.
 
 Return ONLY a JSON object — no markdown, no commentary:
 {
@@ -53,8 +76,49 @@ Return ONLY a JSON object — no markdown, no commentary:
   "linkedin_post": "...",
   "cta_text": "...",
   "hashtags": "#one #two",
-  "image_prompt": "..."
+  "raw_image_concept": "brief visual concept description in 1-2 sentences"
 }`;
+}
+
+function buildImagePromptInstruction(
+  b: KnowledgeBundle,
+  rawImageConcept: string,
+  platform: "x" | "linkedin" | "both",
+) {
+  const platformSize =
+    platform === "x"
+      ? "1600x900 (landscape)"
+      : platform === "linkedin"
+        ? "1200x628 (landscape)"
+        : "1200x628 (landscape)";
+
+  // If a project-specific writing prompt exists, use it to guide the image prompt generation too
+  if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
+    return `${b.writingPrompt.trim()}
+
+الآن مهمتك فقط: اكتب برومبت صورة تنفيذي ودقيق ومباشر لـ ${b.projectName}.
+
+فكرة المنشور التي يجب أن تترجمها بصرياً:
+"${rawImageConcept}"
+
+المنصة: ${platform} — المقاس المطلوب: ${platformSize}
+
+اكتب برومبت الصورة النهائي فقط، بدون شرح، بدون عناوين، بدون ترقيم.
+يجب أن يكون البرومبت باللغة الإنجليزية لضمان أفضل جودة من نموذج توليد الصور.`;
+  }
+
+  // Fallback image prompt instruction
+  return `You are an expert AI image prompt writer for social media ads.
+
+Generate a single, detailed, high-quality image generation prompt for this post:
+"${rawImageConcept}"
+
+Brand: ${b.projectName}
+Brand color: ${b.brandColor || "not specified"}
+Platform: ${platform} — Size: ${platformSize}
+Style: Professional, editorial, clean composition. No watermarks. No text overlays. No people unless essential.
+
+Output the image prompt ONLY — no explanation, no title, no commentary.`;
 }
 
 async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
@@ -79,6 +143,7 @@ async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
     cta: p.main_cta,
     brandColor: p.brand_color,
     brief: p.master_brief,
+    writingPrompt: p.writing_prompt ?? null,
     notes: n
       ? {
           summary: n.summary,
@@ -94,6 +159,21 @@ async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
       : null,
     recentTopics: (recent ?? []).map((r) => r.topic_title).filter(Boolean) as string[],
   };
+}
+
+async function generateDetailedImagePrompt(
+  bundle: KnowledgeBundle,
+  rawImageConcept: string,
+  platform: "x" | "linkedin" | "both",
+  gateway: ReturnType<Awaited<typeof import("./ai-gateway.server")>["createLovableAiGatewayProvider"]>,
+): Promise<string> {
+  const model = gateway("google/gemini-3-flash-preview");
+  const instruction = buildImagePromptInstruction(bundle, rawImageConcept, platform);
+  const { text } = await generateText({
+    model,
+    prompt: instruction,
+  });
+  return text.trim();
 }
 
 async function generateAndStoreImage(prompt: string, projectId: string, contentId: string) {
@@ -164,10 +244,27 @@ export const generateContent = createServerFn({ method: "POST" })
         parsed = { x_post: text.slice(0, 270), linkedin_post: text };
       }
 
-      let imagePath: string | null = null;
-      if (data.with_image && parsed.image_prompt) {
+      // Step 1: Generate detailed image prompt based on raw_image_concept
+      let detailedImagePrompt: string | null = null;
+      if (data.with_image && parsed.raw_image_concept) {
         try {
-          imagePath = await generateAndStoreImage(parsed.image_prompt, data.project_id, row.id);
+          detailedImagePrompt = await generateDetailedImagePrompt(
+            bundle,
+            parsed.raw_image_concept,
+            data.platform,
+            gateway,
+          );
+        } catch (e) {
+          console.error("image prompt generation failed", e);
+          detailedImagePrompt = parsed.raw_image_concept;
+        }
+      }
+
+      // Step 2: Generate the actual image using the detailed prompt
+      let imagePath: string | null = null;
+      if (data.with_image && detailedImagePrompt) {
+        try {
+          imagePath = await generateAndStoreImage(detailedImagePrompt, data.project_id, row.id);
         } catch (e) {
           console.error("image gen failed", e);
         }
@@ -180,7 +277,7 @@ export const generateContent = createServerFn({ method: "POST" })
         linkedin_post: parsed.linkedin_post ?? null,
         cta_text: parsed.cta_text ?? null,
         hashtags: parsed.hashtags ?? null,
-        image_prompt: parsed.image_prompt ?? null,
+        image_prompt: detailedImagePrompt ?? parsed.raw_image_concept ?? null,
         image_url: imagePath,
         status: "ready",
       };
@@ -237,13 +334,29 @@ export const regenerateText = createServerFn({ method: "POST" })
     } catch {
       parsed = {};
     }
+
+    // Regenerate detailed image prompt if raw concept available
+    let detailedImagePrompt: string | null = null;
+    if (parsed.raw_image_concept) {
+      try {
+        detailedImagePrompt = await generateDetailedImagePrompt(
+          bundle,
+          parsed.raw_image_concept,
+          data.platform,
+          gateway,
+        );
+      } catch {
+        detailedImagePrompt = parsed.raw_image_concept;
+      }
+    }
+
     const update = {
       topic_title: parsed.topic_title ?? null,
       x_post: parsed.x_post ?? null,
       linkedin_post: parsed.linkedin_post ?? null,
       cta_text: parsed.cta_text ?? null,
       hashtags: parsed.hashtags ?? null,
-      image_prompt: parsed.image_prompt ?? null,
+      image_prompt: detailedImagePrompt ?? parsed.raw_image_concept ?? null,
     };
     await db.from("generated_content").update(update).eq("id", data.id);
     return update;
