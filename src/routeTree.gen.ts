@@ -9,38 +9,220 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as ReviewRouteImport } from './routes/review'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as GenerateRouteImport } from './routes/generate'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
+import { Route as ProjectsIdKnowledgeRouteImport } from './routes/projects.$id.knowledge'
+import { Route as ApiPublicHooksDailyGenerateRouteImport } from './routes/api/public/hooks/daily-generate'
 
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenerateRoute = GenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIdRoute = ProjectsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ProjectsRoute,
+} as any)
+const ProjectsIdKnowledgeRoute = ProjectsIdKnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => ProjectsIdRoute,
+} as any)
+const ApiPublicHooksDailyGenerateRoute =
+  ApiPublicHooksDailyGenerateRouteImport.update({
+    id: '/api/public/hooks/daily-generate',
+    path: '/api/public/hooks/daily-generate',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRouteWithChildren
+  '/review': typeof ReviewRoute
+  '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRouteWithChildren
+  '/review': typeof ReviewRoute
+  '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/generate': typeof GenerateRoute
+  '/library': typeof LibraryRoute
+  '/projects': typeof ProjectsRouteWithChildren
+  '/review': typeof ReviewRoute
+  '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
+  '/setup': typeof SetupRoute
+  '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
+  '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/generate'
+    | '/library'
+    | '/projects'
+    | '/review'
+    | '/schedule'
+    | '/settings'
+    | '/setup'
+    | '/projects/$id'
+    | '/projects/$id/knowledge'
+    | '/api/public/hooks/daily-generate'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/generate'
+    | '/library'
+    | '/projects'
+    | '/review'
+    | '/schedule'
+    | '/settings'
+    | '/setup'
+    | '/projects/$id'
+    | '/projects/$id/knowledge'
+    | '/api/public/hooks/daily-generate'
+  id:
+    | '__root__'
+    | '/'
+    | '/generate'
+    | '/library'
+    | '/projects'
+    | '/review'
+    | '/schedule'
+    | '/settings'
+    | '/setup'
+    | '/projects/$id'
+    | '/projects/$id/knowledge'
+    | '/api/public/hooks/daily-generate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GenerateRoute: typeof GenerateRoute
+  LibraryRoute: typeof LibraryRoute
+  ProjectsRoute: typeof ProjectsRouteWithChildren
+  ReviewRoute: typeof ReviewRoute
+  ScheduleRoute: typeof ScheduleRoute
+  SettingsRoute: typeof SettingsRoute
+  SetupRoute: typeof SetupRoute
+  ApiPublicHooksDailyGenerateRoute: typeof ApiPublicHooksDailyGenerateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/generate': {
+      id: '/generate'
+      path: '/generate'
+      fullPath: '/generate'
+      preLoaderRoute: typeof GenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +230,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/$id': {
+      id: '/projects/$id'
+      path: '/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof ProjectsIdRouteImport
+      parentRoute: typeof ProjectsRoute
+    }
+    '/projects/$id/knowledge': {
+      id: '/projects/$id/knowledge'
+      path: '/knowledge'
+      fullPath: '/projects/$id/knowledge'
+      preLoaderRoute: typeof ProjectsIdKnowledgeRouteImport
+      parentRoute: typeof ProjectsIdRoute
+    }
+    '/api/public/hooks/daily-generate': {
+      id: '/api/public/hooks/daily-generate'
+      path: '/api/public/hooks/daily-generate'
+      fullPath: '/api/public/hooks/daily-generate'
+      preLoaderRoute: typeof ApiPublicHooksDailyGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface ProjectsIdRouteChildren {
+  ProjectsIdKnowledgeRoute: typeof ProjectsIdKnowledgeRoute
+}
+
+const ProjectsIdRouteChildren: ProjectsIdRouteChildren = {
+  ProjectsIdKnowledgeRoute: ProjectsIdKnowledgeRoute,
+}
+
+const ProjectsIdRouteWithChildren = ProjectsIdRoute._addFileChildren(
+  ProjectsIdRouteChildren,
+)
+
+interface ProjectsRouteChildren {
+  ProjectsIdRoute: typeof ProjectsIdRouteWithChildren
+}
+
+const ProjectsRouteChildren: ProjectsRouteChildren = {
+  ProjectsIdRoute: ProjectsIdRouteWithChildren,
+}
+
+const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
+  ProjectsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GenerateRoute: GenerateRoute,
+  LibraryRoute: LibraryRoute,
+  ProjectsRoute: ProjectsRouteWithChildren,
+  ReviewRoute: ReviewRoute,
+  ScheduleRoute: ScheduleRoute,
+  SettingsRoute: SettingsRoute,
+  SetupRoute: SetupRoute,
+  ApiPublicHooksDailyGenerateRoute: ApiPublicHooksDailyGenerateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
