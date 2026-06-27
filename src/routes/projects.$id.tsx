@@ -7,7 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { ProjectFormModal, type ProjectFormValues } from "@/components/ProjectFormModal";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Pencil, FileText, Calendar, Sparkles, RefreshCw, BookOpen } from "lucide-react";
+import { Pencil, FileText, Calendar, Sparkles, RefreshCw, BookOpen, Save } from "lucide-react";
 
 export const Route = createFileRoute("/projects/$id")({
   head: () => ({ meta: [{ title: "Project · BrandPulse" }] }),
@@ -19,6 +19,7 @@ function ProjectDetail() {
   const router = useRouter();
   const q = useQuery({ queryKey: ["project", id], queryFn: () => getProject({ data: { id } }) });
   const [editOpen, setEditOpen] = useState(false);
+  const [promptValue, setPromptValue] = useState<string | null>(null);
 
   const upsertFn = useServerFn(upsertProject);
   const reExtract = useServerFn(reExtractBrief);
@@ -49,12 +50,34 @@ function ProjectDetail() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const savePrompt = useMutation({
+    mutationFn: (brief: string) =>
+      upsertFn({
+        data: {
+          id,
+          name: project!.name,
+          primary_language: project!.primary_language,
+          brand_color: project!.brand_color,
+          master_brief: brief,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Prompt saved ✓");
+      setPromptValue(null);
+      router.invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   if (q.isLoading) return <AppShell title="Loading…" back="/projects"><div /></AppShell>;
   const project = q.data?.project;
   if (!project) return <AppShell title="Not found" back="/projects"><div className="text-sm text-muted-foreground">Project not found.</div></AppShell>;
   const notes = q.data?.notes;
   const files = q.data?.files ?? [];
   const schedules = q.data?.schedules ?? [];
+
+  const currentPrompt = promptValue ?? (project.master_brief ?? "");
+  const isDirty = promptValue !== null && promptValue !== (project.master_brief ?? "");
 
   return (
     <AppShell
@@ -86,17 +109,49 @@ function ProjectDetail() {
         </Link>
       </div>
 
-      <Section title="Master Brief" right={
-        <button onClick={() => reExt.mutate()} disabled={reExt.isPending} className="flex items-center gap-1 text-xs font-medium text-primary disabled:opacity-50">
-          <RefreshCw className={`h-3 w-3 ${reExt.isPending ? "animate-spin" : ""}`} /> Re-extract
-        </button>
-      }>
-        {project.master_brief ? (
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-            {project.master_brief.length > 600 ? project.master_brief.slice(0, 600) + "…" : project.master_brief}
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">No brief yet. Edit the project to add one.</p>
+      {/* ── Inline Prompt Editor ── */}
+      <Section
+        title="Project Prompt"
+        right={
+          isDirty ? (
+            <button
+              onClick={() => savePrompt.mutate(promptValue!)}
+              disabled={savePrompt.isPending}
+              className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+            >
+              <Save className="h-3 w-3" />
+              {savePrompt.isPending ? "Saving…" : "Save"}
+            </button>
+          ) : (
+            <button
+              onClick={() => reExt.mutate()}
+              disabled={reExt.isPending}
+              className="flex items-center gap-1 text-xs font-medium text-primary disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3 w-3 ${reExt.isPending ? "animate-spin" : ""}`} /> Re-extract
+            </button>
+          )
+        }
+      >
+        <textarea
+          value={currentPrompt}
+          onChange={(e) => setPromptValue(e.target.value)}
+          rows={8}
+          placeholder="اكتب البرومت الخاص بهذا المشروع هنا… (النبرة، الجمهور، الأهداف، الأسلوب)"
+          className="w-full rounded-xl border border-border bg-surface-2 p-3 font-mono text-[13px] leading-relaxed text-foreground outline-none transition-colors focus:border-primary"
+        />
+        {isDirty && (
+          <div className="mt-1 flex items-center justify-between">
+            <p className="flex items-center gap-1 text-[11px] text-primary">
+              <Sparkles className="h-3 w-3" /> سيتم إعادة استخراج المعرفة تلقائياً عند الحفظ
+            </p>
+            <button
+              onClick={() => setPromptValue(null)}
+              className="text-[11px] text-muted-foreground underline"
+            >
+              تراجع
+            </button>
+          </div>
         )}
       </Section>
 
