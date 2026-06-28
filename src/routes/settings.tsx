@@ -34,6 +34,7 @@ function SettingsPage() {
         dark_mode_default: s!.dark_mode_default,
         simple_mode: s!.simple_mode,
         tone_strictness: s!.tone_strictness,
+        master_prompt: (s as unknown as { master_prompt?: string | null }).master_prompt ?? null,
       },
     }),
     onSuccess: () => { toast.success("Saved"); router.invalidate(); },
