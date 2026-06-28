@@ -2,7 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { z } from "zod";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { listProjects } from "@/lib/projects.functions";
 import {
@@ -31,7 +31,6 @@ function GeneratePage() {
   const { id: focusId, project: projFilter } = Route.useSearch();
   const [selectedProject, setSelectedProject] = useState<string | "">(projFilter ?? "");
   const [hint, setHint] = useState("");
-  const [language, setLanguage] = useState<string>("ar");
 
   const projectsQ = useQuery({ queryKey: ["projects"], queryFn: () => listProjects() });
   const listFn = useServerFn(listContent);
@@ -49,13 +48,6 @@ function GeneratePage() {
       }),
   });
 
-  // sync language default to selected project's primary_language
-  const projects = projectsQ.data ?? [];
-  const currentProject = projects.find((p) => p.id === selectedProject);
-  useEffect(() => {
-    if (currentProject?.primary_language) setLanguage(currentProject.primary_language);
-  }, [currentProject?.primary_language]);
-
   const genFn = useServerFn(generateContent);
   const gen = useMutation({
     mutationFn: () =>
@@ -65,7 +57,6 @@ function GeneratePage() {
           platform: "both",
           with_image: true,
           topic_hint: hint || null,
-          language,
         },
       }),
     onSuccess: () => {
@@ -76,6 +67,7 @@ function GeneratePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const projects = projectsQ.data ?? [];
   const items = (contentQ.data ?? []).filter((i) => !focusId || i.id === focusId);
 
   return (
@@ -97,26 +89,6 @@ function GeneratePage() {
           placeholder="Optional: angle hint (e.g. 'launch week day 2')"
           className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-sm"
         />
-        <div>
-          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Language / اللغة</div>
-          <div className="grid grid-cols-4 gap-2">
-            {[
-              { v: "ar", l: "العربية" },
-              { v: "en", l: "English" },
-              { v: "fr", l: "FR" },
-              { v: "es", l: "ES" },
-            ].map((o) => (
-              <button
-                key={o.v}
-                type="button"
-                onClick={() => setLanguage(o.v)}
-                className={`rounded-xl border px-2 py-2 text-xs font-semibold transition ${language === o.v ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface-2 text-muted-foreground"}`}
-              >
-                {o.l}
-              </button>
-            ))}
-          </div>
-        </div>
         <button
           onClick={() => gen.mutate()}
           disabled={gen.isPending || !selectedProject}

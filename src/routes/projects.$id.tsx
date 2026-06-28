@@ -216,7 +216,6 @@ function ProjectDetail() {
           primary_language: project.primary_language,
           brand_color: project.brand_color,
           master_brief: project.master_brief,
-          writing_prompt: (project as unknown as { writing_prompt?: string | null }).writing_prompt ?? null,
         }}
         onSave={(v) => save.mutate(v)}
         saving={save.isPending}
