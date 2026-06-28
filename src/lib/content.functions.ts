@@ -25,7 +25,10 @@ function buildSystemPrompt(b: KnowledgeBundle, platform: "x" | "linkedin" | "bot
   if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
     return `${b.writingPrompt.trim()}
 
-${b.recentTopics?.length ? `\nالمواضيع الأخيرة التي تمت كتابتها — لا تكررها: ${b.recentTopics.join(" | ")}` : ""}
+LANGUAGE OVERRIDE (highest priority): ${langRule}
+All output fields (topic_title, x_post, linkedin_post, cta_text, hashtags, raw_image_concept) MUST be in this language. If the language is English, do NOT mix in Arabic. If Arabic, do NOT mix in English except for unavoidable brand names.
+
+${b.recentTopics?.length ? `\nالمواضيع/المواضيع الأخيرة — لا تكررها: ${b.recentTopics.join(" | ")}` : ""}
 
 PLATFORM RULES:
 - X post: max 270 chars, punchy hook in line 1, no fluff, 1 strong idea, no hashtag spam (0-2 max), no "1/" threads.
@@ -39,7 +42,7 @@ Return ONLY a JSON object — no markdown, no commentary:
   "linkedin_post": "...",
   "cta_text": "...",
   "hashtags": "#one #two",
-  "raw_image_concept": "وصف مختصر للفكرة البصرية للمنشور في جملة أو جملتين"
+  "raw_image_concept": "short visual concept for the post in 1-2 sentences, in the SAME language as the post"
 }`;
   }
 
@@ -92,6 +95,11 @@ function buildImagePromptInstruction(
         ? "1200x628 (landscape)"
         : "1200x628 (landscape)";
 
+  const isArabic = b.language?.toLowerCase().startsWith("ar");
+  const textLangRule = isArabic
+    ? `Any text inside the image MUST be in Arabic (modern Saudi/Gulf-friendly, short). Use a clean Arabic-supporting typeface. Do not mix English words except for the brand name "${b.projectName}".`
+    : `Any text inside the image MUST be in English. Do not include Arabic characters.`;
+
   // If a project-specific writing prompt exists, use it to guide the image prompt generation too
   if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
     return `${b.writingPrompt.trim()}
@@ -103,8 +111,10 @@ function buildImagePromptInstruction(
 
 المنصة: ${platform} — المقاس المطلوب: ${platformSize}
 
+LANGUAGE RULE FOR IMAGE TEXT: ${textLangRule}
+
 اكتب برومبت الصورة النهائي فقط، بدون شرح، بدون عناوين، بدون ترقيم.
-يجب أن يكون البرومبت باللغة الإنجليزية لضمان أفضل جودة من نموذج توليد الصور.`;
+البرومبت نفسه يُكتب بالإنجليزية لتوجيه نموذج توليد الصور، لكن أي نص يظهر داخل الصورة يجب أن يلتزم بقاعدة اللغة أعلاه.`;
   }
 
   // Fallback image prompt instruction
@@ -116,7 +126,8 @@ Generate a single, detailed, high-quality image generation prompt for this post:
 Brand: ${b.projectName}
 Brand color: ${b.brandColor || "not specified"}
 Platform: ${platform} — Size: ${platformSize}
-Style: Professional, editorial, clean composition. No watermarks. No text overlays. No people unless essential.
+Style: Professional, editorial, clean composition. No watermarks. No people unless essential.
+LANGUAGE RULE FOR ANY TEXT INSIDE THE IMAGE: ${textLangRule}
 
 Output the image prompt ONLY — no explanation, no title, no commentary.`;
 }
@@ -203,6 +214,7 @@ const GenInput = z.object({
   scheduled_time: z.string().optional().nullable(),
   with_image: z.boolean().default(true),
   topic_hint: z.string().max(500).optional().nullable(),
+  language: z.string().max(20).optional().nullable(),
 });
 
 export const generateContent = createServerFn({ method: "POST" })
@@ -230,6 +242,7 @@ export const generateContent = createServerFn({ method: "POST" })
 
     try {
       const bundle = await loadProjectBundle(data.project_id);
+      if (data.language) bundle.language = data.language;
       const gateway = createLovableAiGatewayProvider(getApiKey());
       const model = gateway("google/gemini-3-flash-preview");
       const prompt = buildSystemPrompt(bundle, data.platform);
