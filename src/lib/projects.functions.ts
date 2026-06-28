@@ -12,7 +12,9 @@ export const listProjects = createServerFn({ method: "GET" }).handler(async () =
   return data ?? [];
 });
 
-export const getProject = createServerFn({ method: "GET" })
+// Changed from GET → POST so the inputValidator / data body is correctly
+// transmitted and the project detail page can actually receive the id.
+export const getProject = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     const { getDb } = await import("./db.server");
