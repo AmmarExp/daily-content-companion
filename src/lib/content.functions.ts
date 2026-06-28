@@ -124,7 +124,7 @@ Output the image prompt ONLY — no explanation, no title, no commentary.`;
 async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
   const { getDb } = await import("./db.server");
   const db = getDb();
-  const [{ data: p }, { data: n }, { data: recent }] = await Promise.all([
+  const [{ data: p }, { data: n }, { data: recent }, { data: settings }] = await Promise.all([
     db.from("projects").select("*").eq("id", projectId).maybeSingle(),
     db.from("project_knowledge_notes").select("*").eq("project_id", projectId).maybeSingle(),
     db
@@ -133,8 +133,13 @@ async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
       .eq("project_id", projectId)
       .order("created_at", { ascending: false })
       .limit(10),
+    db.from("app_settings").select("*").limit(1).maybeSingle(),
   ]);
   if (!p) throw new Error("Project not found");
+  const projectPrompt = p.writing_prompt ?? null;
+  const globalPrompt = (settings as unknown as { master_prompt?: string | null } | null)?.master_prompt ?? null;
+  const writingPrompt =
+    projectPrompt && projectPrompt.trim().length > 100 ? projectPrompt : globalPrompt;
   return {
     projectName: p.name,
     language: p.primary_language,
@@ -143,7 +148,7 @@ async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
     cta: p.main_cta,
     brandColor: p.brand_color,
     brief: p.master_brief,
-    writingPrompt: p.writing_prompt ?? null,
+    writingPrompt,
     notes: n
       ? {
           summary: n.summary,
@@ -160,6 +165,7 @@ async function loadProjectBundle(projectId: string): Promise<KnowledgeBundle> {
     recentTopics: (recent ?? []).map((r) => r.topic_title).filter(Boolean) as string[],
   };
 }
+
 
 async function generateDetailedImagePrompt(
   bundle: KnowledgeBundle,
