@@ -25,7 +25,10 @@ function buildSystemPrompt(b: KnowledgeBundle, platform: "x" | "linkedin" | "bot
   if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
     return `${b.writingPrompt.trim()}
 
-${b.recentTopics?.length ? `\nالمواضيع الأخيرة التي تمت كتابتها — لا تكررها: ${b.recentTopics.join(" | ")}` : ""}
+LANGUAGE OVERRIDE (highest priority): ${langRule}
+All output fields (topic_title, x_post, linkedin_post, cta_text, hashtags, raw_image_concept) MUST be in this language. If the language is English, do NOT mix in Arabic. If Arabic, do NOT mix in English except for unavoidable brand names.
+
+${b.recentTopics?.length ? `\nالمواضيع/المواضيع الأخيرة — لا تكررها: ${b.recentTopics.join(" | ")}` : ""}
 
 PLATFORM RULES:
 - X post: max 270 chars, punchy hook in line 1, no fluff, 1 strong idea, no hashtag spam (0-2 max), no "1/" threads.
@@ -39,7 +42,7 @@ Return ONLY a JSON object — no markdown, no commentary:
   "linkedin_post": "...",
   "cta_text": "...",
   "hashtags": "#one #two",
-  "raw_image_concept": "وصف مختصر للفكرة البصرية للمنشور في جملة أو جملتين"
+  "raw_image_concept": "short visual concept for the post in 1-2 sentences, in the SAME language as the post"
 }`;
   }
 
