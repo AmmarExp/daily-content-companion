@@ -95,6 +95,20 @@ export function ProjectFormModal({
             </p>
           </Field>
 
+          <Field
+            label="برومت المشروع المخصص (اختياري)"
+            hint="يستبدل البرومت العام في الإعدادات لهذا المشروع تحديداً. اتركه فارغاً لاستخدام البرومت العام."
+          >
+            <textarea
+              dir="auto"
+              value={v.writing_prompt ?? ""}
+              onChange={(e) => set("writing_prompt", e.target.value)}
+              rows={8}
+              className="input min-h-[160px] text-[13px] leading-relaxed"
+              placeholder="اكتب هنا البرومت الخاص بهذا المشروع فقط (النبرة، الأسلوب، قواعد الكتابة، توجيهات الصور)…"
+            />
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Language">
               <select
