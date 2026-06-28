@@ -31,6 +31,7 @@ function GeneratePage() {
   const { id: focusId, project: projFilter } = Route.useSearch();
   const [selectedProject, setSelectedProject] = useState<string | "">(projFilter ?? "");
   const [hint, setHint] = useState("");
+  const [language, setLanguage] = useState<string>("ar");
 
   const projectsQ = useQuery({ queryKey: ["projects"], queryFn: () => listProjects() });
   const listFn = useServerFn(listContent);
@@ -48,6 +49,14 @@ function GeneratePage() {
       }),
   });
 
+  // sync language default to selected project's primary_language
+  const projects = projectsQ.data ?? [];
+  const currentProject = projects.find((p) => p.id === selectedProject);
+  useState(() => {
+    if (currentProject?.primary_language) setLanguage(currentProject.primary_language);
+    return 0;
+  });
+
   const genFn = useServerFn(generateContent);
   const gen = useMutation({
     mutationFn: () =>
@@ -57,6 +66,7 @@ function GeneratePage() {
           platform: "both",
           with_image: true,
           topic_hint: hint || null,
+          language,
         },
       }),
     onSuccess: () => {
