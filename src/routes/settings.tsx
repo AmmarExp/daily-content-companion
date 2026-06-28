@@ -34,6 +34,7 @@ function SettingsPage() {
         dark_mode_default: s!.dark_mode_default,
         simple_mode: s!.simple_mode,
         tone_strictness: s!.tone_strictness,
+        master_prompt: (s as unknown as { master_prompt?: string | null }).master_prompt ?? null,
       },
     }),
     onSuccess: () => { toast.success("Saved"); router.invalidate(); },
@@ -88,6 +89,22 @@ function SettingsPage() {
           </select>
         </Field>
       </Group>
+
+      <Group title="تحديث البرومت">
+        <Field label="البرومت الرئيسي للذكاء الاصطناعي">
+          <textarea
+            dir="auto"
+            rows={10}
+            value={(s as unknown as { master_prompt?: string | null }).master_prompt ?? ""}
+            onChange={(e) => set("master_prompt" as keyof S, e.target.value as S[keyof S])}
+            className="input"
+            style={{ minHeight: 220, lineHeight: 1.6, fontFamily: "inherit" }}
+            placeholder="اكتب هنا البرومت التوجيهي الذي سيستخدمه الذكاء الاصطناعي لكتابة المنشورات وتوليد برومت الصور..."
+          />
+        </Field>
+      </Group>
+
+
 
       <button onClick={() => save.mutate()} disabled={save.isPending} className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60">
         {save.isPending ? "Saving…" : "Save settings"}

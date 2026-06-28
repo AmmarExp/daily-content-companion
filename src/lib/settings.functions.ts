@@ -25,6 +25,7 @@ const SettingsInput = z.object({
   dark_mode_default: z.boolean().optional(),
   simple_mode: z.boolean().optional(),
   tone_strictness: z.string().max(20).optional(),
+  master_prompt: z.string().max(20000).optional().nullable(),
 });
 
 export const saveSettings = createServerFn({ method: "POST" })

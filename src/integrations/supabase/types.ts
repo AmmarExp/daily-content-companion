@@ -23,6 +23,7 @@ export type Database = {
           image_aspect_ratio: string
           image_brand_consistency: string
           linkedin_style_mode: string
+          master_prompt: string | null
           simple_mode: boolean
           timezone: string
           tone_strictness: string
@@ -37,6 +38,7 @@ export type Database = {
           image_aspect_ratio?: string
           image_brand_consistency?: string
           linkedin_style_mode?: string
+          master_prompt?: string | null
           simple_mode?: boolean
           timezone?: string
           tone_strictness?: string
@@ -51,6 +53,7 @@ export type Database = {
           image_aspect_ratio?: string
           image_brand_consistency?: string
           linkedin_style_mode?: string
+          master_prompt?: string | null
           simple_mode?: boolean
           timezone?: string
           tone_strictness?: string
@@ -262,6 +265,7 @@ export type Database = {
           target_audience: string | null
           updated_at: string
           website_url: string | null
+          writing_prompt: string | null
         }
         Insert: {
           active?: boolean
@@ -278,6 +282,7 @@ export type Database = {
           target_audience?: string | null
           updated_at?: string
           website_url?: string | null
+          writing_prompt?: string | null
         }
         Update: {
           active?: boolean
@@ -294,6 +299,7 @@ export type Database = {
           target_audience?: string | null
           updated_at?: string
           website_url?: string | null
+          writing_prompt?: string | null
         }
         Relationships: []
       }
