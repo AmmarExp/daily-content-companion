@@ -97,6 +97,26 @@ function GeneratePage() {
           placeholder="Optional: angle hint (e.g. 'launch week day 2')"
           className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-sm"
         />
+        <div>
+          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Language / اللغة</div>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { v: "ar", l: "العربية" },
+              { v: "en", l: "English" },
+              { v: "fr", l: "FR" },
+              { v: "es", l: "ES" },
+            ].map((o) => (
+              <button
+                key={o.v}
+                type="button"
+                onClick={() => setLanguage(o.v)}
+                className={`rounded-xl border px-2 py-2 text-xs font-semibold transition ${language === o.v ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface-2 text-muted-foreground"}`}
+              >
+                {o.l}
+              </button>
+            ))}
+          </div>
+        </div>
         <button
           onClick={() => gen.mutate()}
           disabled={gen.isPending || !selectedProject}
