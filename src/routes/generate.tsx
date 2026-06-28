@@ -77,7 +77,6 @@ function GeneratePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const projects = projectsQ.data ?? [];
   const items = (contentQ.data ?? []).filter((i) => !focusId || i.id === focusId);
 
   return (
