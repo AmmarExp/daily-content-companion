@@ -95,6 +95,11 @@ function buildImagePromptInstruction(
         ? "1200x628 (landscape)"
         : "1200x628 (landscape)";
 
+  const isArabic = b.language?.toLowerCase().startsWith("ar");
+  const textLangRule = isArabic
+    ? `Any text inside the image MUST be in Arabic (modern Saudi/Gulf-friendly, short). Use a clean Arabic-supporting typeface. Do not mix English words except for the brand name "${b.projectName}".`
+    : `Any text inside the image MUST be in English. Do not include Arabic characters.`;
+
   // If a project-specific writing prompt exists, use it to guide the image prompt generation too
   if (b.writingPrompt && b.writingPrompt.trim().length > 100) {
     return `${b.writingPrompt.trim()}
@@ -106,8 +111,10 @@ function buildImagePromptInstruction(
 
 المنصة: ${platform} — المقاس المطلوب: ${platformSize}
 
+LANGUAGE RULE FOR IMAGE TEXT: ${textLangRule}
+
 اكتب برومبت الصورة النهائي فقط، بدون شرح، بدون عناوين، بدون ترقيم.
-يجب أن يكون البرومبت باللغة الإنجليزية لضمان أفضل جودة من نموذج توليد الصور.`;
+البرومبت نفسه يُكتب بالإنجليزية لتوجيه نموذج توليد الصور، لكن أي نص يظهر داخل الصورة يجب أن يلتزم بقاعدة اللغة أعلاه.`;
   }
 
   // Fallback image prompt instruction
@@ -119,7 +126,8 @@ Generate a single, detailed, high-quality image generation prompt for this post:
 Brand: ${b.projectName}
 Brand color: ${b.brandColor || "not specified"}
 Platform: ${platform} — Size: ${platformSize}
-Style: Professional, editorial, clean composition. No watermarks. No text overlays. No people unless essential.
+Style: Professional, editorial, clean composition. No watermarks. No people unless essential.
+LANGUAGE RULE FOR ANY TEXT INSIDE THE IMAGE: ${textLangRule}
 
 Output the image prompt ONLY — no explanation, no title, no commentary.`;
 }
