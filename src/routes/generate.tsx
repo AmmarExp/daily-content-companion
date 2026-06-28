@@ -52,10 +52,9 @@ function GeneratePage() {
   // sync language default to selected project's primary_language
   const projects = projectsQ.data ?? [];
   const currentProject = projects.find((p) => p.id === selectedProject);
-  useState(() => {
+  useEffect(() => {
     if (currentProject?.primary_language) setLanguage(currentProject.primary_language);
-    return 0;
-  });
+  }, [currentProject?.primary_language]);
 
   const genFn = useServerFn(generateContent);
   const gen = useMutation({
