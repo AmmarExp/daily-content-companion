@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, FolderKanban, Sparkles, Library, Settings } from "lucide-react";
+import { Home, FolderKanban, Sparkles, Calendar, Library, Settings } from "lucide-react";
 
 type NavItem = {
-  to: "/" | "/projects" | "/generate" | "/library" | "/settings";
+  to: "/" | "/projects" | "/generate" | "/schedule" | "/library" | "/settings";
   label: string;
   icon: typeof Home;
   exact?: boolean;
@@ -12,6 +12,7 @@ const items: NavItem[] = [
   { to: "/", label: "Today", icon: Home, exact: true },
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/generate", label: "Generate", icon: Sparkles, primary: true },
+  { to: "/schedule", label: "Schedule", icon: Calendar },
   { to: "/library", label: "Library", icon: Library },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
