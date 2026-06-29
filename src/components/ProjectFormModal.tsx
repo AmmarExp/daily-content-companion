@@ -13,6 +13,7 @@ export type ProjectFormValues = {
   primary_language: string;
   brand_color: string;
   master_brief?: string | null;
+  writing_prompt?: string | null;
 };
 
 export function ProjectFormModal({
