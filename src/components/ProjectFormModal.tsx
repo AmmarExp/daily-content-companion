@@ -95,6 +95,19 @@ export function ProjectFormModal({
             </p>
           </Field>
 
+          <Field
+            label="AI Prompt (custom for this project)"
+            hint="Optional. Overrides the global prompt in Settings. Use this to give the AI specific writing rules for this project only."
+          >
+            <textarea
+              value={v.writing_prompt ?? ""}
+              onChange={(e) => set("writing_prompt", e.target.value)}
+              rows={6}
+              className="input min-h-[120px] font-mono text-[13px] leading-relaxed"
+              placeholder="مثلاً: أنت مساعد ذكاء اصطناعي متخصص حصرياً في صناعة محتوى السوشال ميديا لمشروع …"
+            />
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Language">
               <select
