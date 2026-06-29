@@ -231,6 +231,7 @@ export const generateContent = createServerFn({ method: "POST" })
 
     try {
       const bundle = await loadProjectBundle(data.project_id);
+      if (data.language) bundle.language = data.language;
       const gateway = createLovableAiGatewayProvider(getApiKey());
       const model = gateway("google/gemini-3-flash-preview");
       const prompt = buildSystemPrompt(bundle, data.platform);
