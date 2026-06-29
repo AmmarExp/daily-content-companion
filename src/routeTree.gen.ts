@@ -13,10 +13,10 @@ import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ReviewRouteImport } from './routes/review'
-import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as GenerateRouteImport } from './routes/generate'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsIdRouteImport } from './routes/projects.$id'
 import { Route as ProjectsIdKnowledgeRouteImport } from './routes/projects.$id.knowledge'
 import { Route as ApiPublicHooksDailyGenerateRouteImport } from './routes/api/public/hooks/daily-generate'
@@ -41,11 +41,6 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
@@ -61,10 +56,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsIdRoute = ProjectsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ProjectsRoute,
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsIdKnowledgeRoute = ProjectsIdKnowledgeRouteImport.update({
   id: '/knowledge',
@@ -82,12 +82,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/generate': typeof GenerateRoute
   '/library': typeof LibraryRoute
-  '/projects': typeof ProjectsRouteWithChildren
   '/review': typeof ReviewRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects/': typeof ProjectsIndexRoute
   '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
@@ -95,12 +95,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/generate': typeof GenerateRoute
   '/library': typeof LibraryRoute
-  '/projects': typeof ProjectsRouteWithChildren
   '/review': typeof ReviewRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects': typeof ProjectsIndexRoute
   '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
@@ -109,12 +109,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/generate': typeof GenerateRoute
   '/library': typeof LibraryRoute
-  '/projects': typeof ProjectsRouteWithChildren
   '/review': typeof ReviewRoute
   '/schedule': typeof ScheduleRoute
   '/settings': typeof SettingsRoute
   '/setup': typeof SetupRoute
   '/projects/$id': typeof ProjectsIdRouteWithChildren
+  '/projects/': typeof ProjectsIndexRoute
   '/projects/$id/knowledge': typeof ProjectsIdKnowledgeRoute
   '/api/public/hooks/daily-generate': typeof ApiPublicHooksDailyGenerateRoute
 }
@@ -124,12 +124,12 @@ export interface FileRouteTypes {
     | '/'
     | '/generate'
     | '/library'
-    | '/projects'
     | '/review'
     | '/schedule'
     | '/settings'
     | '/setup'
     | '/projects/$id'
+    | '/projects/'
     | '/projects/$id/knowledge'
     | '/api/public/hooks/daily-generate'
   fileRoutesByTo: FileRoutesByTo
@@ -137,12 +137,12 @@ export interface FileRouteTypes {
     | '/'
     | '/generate'
     | '/library'
-    | '/projects'
     | '/review'
     | '/schedule'
     | '/settings'
     | '/setup'
     | '/projects/$id'
+    | '/projects'
     | '/projects/$id/knowledge'
     | '/api/public/hooks/daily-generate'
   id:
@@ -150,12 +150,12 @@ export interface FileRouteTypes {
     | '/'
     | '/generate'
     | '/library'
-    | '/projects'
     | '/review'
     | '/schedule'
     | '/settings'
     | '/setup'
     | '/projects/$id'
+    | '/projects/'
     | '/projects/$id/knowledge'
     | '/api/public/hooks/daily-generate'
   fileRoutesById: FileRoutesById
@@ -164,11 +164,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GenerateRoute: typeof GenerateRoute
   LibraryRoute: typeof LibraryRoute
-  ProjectsRoute: typeof ProjectsRouteWithChildren
   ReviewRoute: typeof ReviewRoute
   ScheduleRoute: typeof ScheduleRoute
   SettingsRoute: typeof SettingsRoute
   SetupRoute: typeof SetupRoute
+  ProjectsIdRoute: typeof ProjectsIdRouteWithChildren
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
   ApiPublicHooksDailyGenerateRoute: typeof ApiPublicHooksDailyGenerateRoute
 }
 
@@ -202,13 +203,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/library': {
       id: '/library'
       path: '/library'
@@ -230,12 +224,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects/$id': {
       id: '/projects/$id'
-      path: '/$id'
+      path: '/projects/$id'
       fullPath: '/projects/$id'
       preLoaderRoute: typeof ProjectsIdRouteImport
-      parentRoute: typeof ProjectsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/projects/$id/knowledge': {
       id: '/projects/$id/knowledge'
@@ -266,27 +267,16 @@ const ProjectsIdRouteWithChildren = ProjectsIdRoute._addFileChildren(
   ProjectsIdRouteChildren,
 )
 
-interface ProjectsRouteChildren {
-  ProjectsIdRoute: typeof ProjectsIdRouteWithChildren
-}
-
-const ProjectsRouteChildren: ProjectsRouteChildren = {
-  ProjectsIdRoute: ProjectsIdRouteWithChildren,
-}
-
-const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
-  ProjectsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GenerateRoute: GenerateRoute,
   LibraryRoute: LibraryRoute,
-  ProjectsRoute: ProjectsRouteWithChildren,
   ReviewRoute: ReviewRoute,
   ScheduleRoute: ScheduleRoute,
   SettingsRoute: SettingsRoute,
   SetupRoute: SetupRoute,
+  ProjectsIdRoute: ProjectsIdRouteWithChildren,
+  ProjectsIndexRoute: ProjectsIndexRoute,
   ApiPublicHooksDailyGenerateRoute: ApiPublicHooksDailyGenerateRoute,
 }
 export const routeTree = rootRouteImport
