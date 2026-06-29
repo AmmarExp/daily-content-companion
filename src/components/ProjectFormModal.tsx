@@ -13,6 +13,7 @@ export type ProjectFormValues = {
   primary_language: string;
   brand_color: string;
   master_brief?: string | null;
+  writing_prompt?: string | null;
 };
 
 export function ProjectFormModal({
@@ -92,6 +93,19 @@ export function ProjectFormModal({
             <p className="mt-1 flex items-center gap-1 text-[11px] text-primary">
               <Sparkles className="h-3 w-3" /> Auto-extracted on save
             </p>
+          </Field>
+
+          <Field
+            label="AI Prompt (custom for this project)"
+            hint="Optional. Overrides the global prompt in Settings. Use this to give the AI specific writing rules for this project only."
+          >
+            <textarea
+              value={v.writing_prompt ?? ""}
+              onChange={(e) => set("writing_prompt", e.target.value)}
+              rows={6}
+              className="input min-h-[120px] font-mono text-[13px] leading-relaxed"
+              placeholder="مثلاً: أنت مساعد ذكاء اصطناعي متخصص حصرياً في صناعة محتوى السوشال ميديا لمشروع …"
+            />
           </Field>
 
           <div className="grid grid-cols-2 gap-3">

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ProjectFormModal, type ProjectFormValues } from "@/components/ProjectFormModal";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/projects")({
+export const Route = createFileRoute("/projects/")({
   head: () => ({ meta: [{ title: "Projects · BrandPulse" }] }),
   component: ProjectsPage,
 });

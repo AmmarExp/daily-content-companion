@@ -38,6 +38,7 @@ const ProjectInput = z.object({
   primary_language: z.string().max(20).default("en"),
   brand_color: z.string().max(20).default("#6366f1"),
   master_brief: z.string().max(50000).optional().nullable(),
+  writing_prompt: z.string().max(20000).optional().nullable(),
 });
 
 export const upsertProject = createServerFn({ method: "POST" })

@@ -31,6 +31,7 @@ function GeneratePage() {
   const { id: focusId, project: projFilter } = Route.useSearch();
   const [selectedProject, setSelectedProject] = useState<string | "">(projFilter ?? "");
   const [hint, setHint] = useState("");
+  const [language, setLanguage] = useState<string>("");
 
   const projectsQ = useQuery({ queryKey: ["projects"], queryFn: () => listProjects() });
   const listFn = useServerFn(listContent);
@@ -57,6 +58,7 @@ function GeneratePage() {
           platform: "both",
           with_image: true,
           topic_hint: hint || null,
+          language: language || null,
         },
       }),
     onSuccess: () => {
@@ -89,6 +91,17 @@ function GeneratePage() {
           placeholder="Optional: angle hint (e.g. 'launch week day 2')"
           className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-sm"
         />
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className="w-full rounded-xl border border-border bg-surface-2 px-3 py-3 text-sm"
+        >
+          <option value="">Language: project default</option>
+          <option value="ar">العربية (Saudi/Gulf)</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+        </select>
         <button
           onClick={() => gen.mutate()}
           disabled={gen.isPending || !selectedProject}

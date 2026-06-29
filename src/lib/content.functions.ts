@@ -203,6 +203,7 @@ const GenInput = z.object({
   scheduled_time: z.string().optional().nullable(),
   with_image: z.boolean().default(true),
   topic_hint: z.string().max(500).optional().nullable(),
+  language: z.string().max(20).optional().nullable(),
 });
 
 export const generateContent = createServerFn({ method: "POST" })
@@ -230,6 +231,7 @@ export const generateContent = createServerFn({ method: "POST" })
 
     try {
       const bundle = await loadProjectBundle(data.project_id);
+      if (data.language) bundle.language = data.language;
       const gateway = createLovableAiGatewayProvider(getApiKey());
       const model = gateway("google/gemini-3-flash-preview");
       const prompt = buildSystemPrompt(bundle, data.platform);
