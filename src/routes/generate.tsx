@@ -31,6 +31,7 @@ function GeneratePage() {
   const { id: focusId, project: projFilter } = Route.useSearch();
   const [selectedProject, setSelectedProject] = useState<string | "">(projFilter ?? "");
   const [hint, setHint] = useState("");
+  const [language, setLanguage] = useState<string>("");
 
   const projectsQ = useQuery({ queryKey: ["projects"], queryFn: () => listProjects() });
   const listFn = useServerFn(listContent);
@@ -57,6 +58,7 @@ function GeneratePage() {
           platform: "both",
           with_image: true,
           topic_hint: hint || null,
+          language: language || null,
         },
       }),
     onSuccess: () => {
